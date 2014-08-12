@@ -1,0 +1,21 @@
+<!-- bconsole/cmd.phtml -->
+
+<div  style="color: #0f0;">OK : <?php echo $this->bcommand; ?></div><br>
+<pre>
+<?php
+    echo $this->msg;
+    if ( $this->command_output )
+        foreach ($this->command_output as $line) {
+            echo '<br>', $line;
+        }
+?>
+<br>
+</pre>
+<div  style="color: #0f0;">return :
+<?php 
+    if ( $this->return_var )
+            echo $this->return_var;
+    else
+        echo 'null';
+?>
+</div><br>

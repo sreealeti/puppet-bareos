@@ -1,0 +1,71 @@
+<!-- job/next-dashboard.phtml -->
+<h1 class="dashboard">
+	<a href="<?php echo $this->baseUrl;?>/job/next" id="dashboard">
+		<?php echo $this->escape($this->title); ?>
+	</a>
+</h1>
+
+<?php if ($this->result): ?>
+<?php
+	if ($this->result[0] == 'NOFOUND') {
+		echo '<font color="red"><div align="center"><p>',
+		      $this->translate->_("ERROR: Cannot execute bconsole. File not found."), '</p></div></font>';
+	}
+ 	elseif ($this->result[0] == 'ERROR') {
+ 		echo '<font color="red"><div align="center"><p>',
+ 		     $this->translate->_("ERROR: There was a problem executing bconsole. See below."), '</p></div>';
+ 		foreach ($this->result as $line) {
+			echo $line, '<br>';
+		}
+		echo '</font>';
+ 	} else	{
+?>
+
+<table id="box-table-dashboard">
+<thead>
+<tr>
+	<th scope="col"> <?php print $this->translate->_("Level"); ?> </th>
+	<th scope="col"> <?php print $this->translate->_("Type"); ?> </th>
+	<th scope="col"> <?php print $this->translate->_("Priority"); ?> </th>
+	<th scope="col"> <?php print $this->translate->_("Scheduled"); ?> </th>
+	<th scope="col"> <?php print $this->translate->_("Job Name"); ?> </th>
+    <th scope="col"> <?php print $this->translate->_("Volume"); ?> </th>
+</tr>
+</thead>
+<tbody>
+<?php foreach($this->result as $line) : ?>
+<tr>
+	<td><?php echo $this->escape($line['level']);?></td>
+	<td><?php echo $this->escape($line['type']);?></td>
+	<td align="center"><?php echo $this->escape($line['pri']);?></td>
+	<td><?php echo $this->escape($line['date']);?></td>
+
+	<td><?php echo $this->escape($line['name']);?></td>
+	<td>
+		<?php if ($this->escape($line['vol']) === '*unknown*') : ?>
+			<?php echo $this->escape($line['vol']); ?>
+		<?php else : ?>
+			<a href="<?php echo $this->baseUrl, "/volume/find-name/volname/",
+   				$this->escape($line['vol']);?>"  title="<?php print $this->translate->_("Detail Volume");?>">
+			<?php echo $this->escape($line['vol']);?></a>
+		<?php endif; ?>
+	</td>
+
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+
+<?php
+}
+?>
+
+<?php else : ?>
+<div class="ui-widget" style="float: left;">
+	<div class="ui-state-highlight ui-corner-all"">
+		<p class="dashboard"><span class="ui-icon ui-icon-info" style="float: left; margin-right: 0.3em;"></span>
+		<?php print $this->translate->_("No Scheduled Jobs found."); ?></p>
+	</div>
+</div>
+<div style="clear: both;"><!--  --></div>
+<?php endif; ?>

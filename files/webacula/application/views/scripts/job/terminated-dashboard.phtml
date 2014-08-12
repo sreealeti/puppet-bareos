@@ -1,0 +1,144 @@
+<!-- job/terminated-dashboard.phtml -->
+
+<h1 class="dashboard">
+	<a href="<?php echo $this->baseUrl;?>/job/terminated" id="dashboard">
+		<?php echo $this->escape($this->title); ?>
+	</a>
+</h1>
+
+<?php if ($this->result): ?>
+
+<table id="box-table-dashboard">
+<thead>
+<tr>
+     <th scope="col">&nbsp;</th>
+     <th scope="col">&nbsp;</th>
+     <th scope="col"> <?php print $this->translate->_("Id"); ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Job Name"); ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Status"); ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Level"); ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Files"); ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Bytes"); ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Errors"); ?> </th>
+</tr>
+</thead>
+<tbody>
+<?php foreach($this->result as $line) : ?>
+<tr>
+    <td>
+        <?php
+            if ( isset($line['poolid'], $line['poolname']) )	{
+                echo '<a href="';
+                echo $this->baseUrl, '/restorejob/main-form/jobid/', $this->escape($line['jobid']);
+                echo '" title="', $this->translate->_("Restore Job"), '">';
+                echo '<img src="', $this->baseUrl, '/images/restore-small.png" alt="', $this->translate->_("Restore Job"), '" border="0" hspace="2">';
+                echo '</a>';
+            }
+        ?>
+    </td>
+    <td>
+        <?php
+            if ( isset($line['jobname']) && ($line['type'] != 'R') )    {
+                // re-run button
+                echo '<a href="';
+                echo $this->baseUrl, '/job/run-job/jobname/', $this->escape($line['jobname']);
+                echo '" title="', $this->translate->_("Re-run Job"), '">';
+                echo '<img src="', $this->baseUrl, '/images/re-run-job-small.png" alt="', $this->translate->_("Re-run Job"), '" border="0" hspace="2">';
+                echo '</a>';
+            }
+        ?>
+    </td>
+    <td>
+        <a href="<?php echo $this->baseUrl, '/job/detail/jobid/', $this->escape($line['jobid']); ?>"
+            title="<?php echo $this->translate->_("Detail Job"); ?>">
+            <?php echo $line['jobid']; ?>
+        </a>
+	</td>
+
+	<!-- Job.Name -->
+	<td><?php echo $this->escape($line['jobname']);?></td>
+
+	<!-- Status -->
+	<?php
+		$class_td = '';
+		if ( $line['joberrors'] != 0 )	{
+		    if ( $line['jobstatus'] == 'T' )	{
+		        $class_td = 'class="warn"';
+		    } else {
+		        // 100% что была какая-то ошибка
+		        $class_td = 'class="err"';
+		    }
+			echo '<td ', $class_td, ' align="center"> ',
+			     $this->translate->_( $this->escape($line['jobstatuslong']) ), ' </td>';
+		}
+		elseif	( $line['jobstatus'] == 'T' )	{
+			echo '<td align="center">OK</td>';
+		} else {
+		    // ошибок вроде нет, но что-то не в порядке
+		    if ( ($line['jobstatus'] == 'f') OR ($line['jobstatus'] == 'E') )	{
+		        // fatal error
+                $class_td = 'class="err"';
+		    } else {
+		        $class_td = 'class="warn"';
+		    }
+			echo '<td ', $class_td, ' align="center">',
+			     $this->translate->_( $this->escape($line['jobstatuslong']) ), '</td>';
+		}
+	?>
+
+	<td align="center"><?php echo $this->escape($line['level']);?></td>
+
+	<?php
+		if ( ($line['jobfiles'] == 0) && ($line['type'] != 'D') ) {
+			$class = 'class="warn"';
+		} else {
+			$class = '';
+		}
+		echo '<td ', $class, ' align="right">', number_format($line['jobfiles']), '</td>';
+	?>
+
+	<?php
+		if ( ($line['jobbytes'] == 0) && ($line['type'] != 'D') ) {
+			$class = 'class="warn"';
+		} else {
+			$class = '';
+		}
+		echo '<td ', $class, ' align="right">', $this->convBytes($line['jobbytes']), '</td>';
+	?>
+
+<!-- Errors -->
+<?php
+    if ( $line['joberrors'] == 0 )
+        echo '<td align="center">-</td>';
+    else  {
+        if ( $line['reviewed'] > 0 )  {
+            // reviewed icon
+            echo '<td align="right">';
+            echo '<img src="', $this->baseUrl, '/images/dialog-ok-apply-small.png" align="absmiddle" ',
+                ' alt="', $this->translate->_("Bacula Job Reviewed"),'"',
+                ' title="', $this->translate->_("Bacula Job Reviewed"),'"',
+                ' border="0" hspace="4">';
+        } else
+            echo '<td class="err" align="right">';
+        echo '<a href="',
+            $this->baseUrl, '/log/view-log-id/jobid/', $this->escape($line['jobid']), '" title="',
+            $this->translate->_("View Messages"), '"';
+        if ( $line['reviewed'] == 0 )
+            echo ' class="linkerr" ';
+        echo '>', $this->escape($line['joberrors']), '</a></td>';
+    }
+?>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+
+<?php else: ?>
+<div class="ui-widget" style="float: left;">
+	<div class="ui-state-highlight ui-corner-all">
+		<p class="dashboard"><span class="ui-icon ui-icon-info" style="float: left; margin-right: 0.3em;"></span>
+		<?php print $this->translate->_("No Jobs found."); ?></p>
+	</div>
+</div>
+<div style="clear: both;"><!--  --></div>
+<?php endif; ?>

@@ -1,0 +1,46 @@
+
+The list of contributors you can find in the file AUTHORS.
+
+For Contributors
+~~~~~~~~~~~~~~~~
+
+If you find a bug and describe it in the bugtracker
+  https://sourceforge.net/tracker/?group_id=201199&atid=976599
+I'll be grateful.
+If you send me a patch, I'll be very grateful.
+
+Can attach the patch directly in the bugtracker or send it to me by email tim4dev@gmail.com
+
+If you are working with Git, then use
+  git send-email
+And follow these simple rules :
+"Pro Git : Commit Guidelines" http://progit.org/book/ch5-2.html
+
+
+
+For Translators
+~~~~~~~~~~~~~~~
+
+Webacula support multilingual - standard gettext (*.mo) files.
+Make copy languages/en/webacula_en.po and modify for your language.
+And send me the file as described above.
+
+
+
+For designers
+~~~~~~~~~~~~~
+
+Now very easy to create new skins.
+For a basis, take the contents of directory "html/styles/default".
+Create a subdirectory in "html/styles", for example "html/styles/mycoolskin".
+Make their own styles and images.
+Further, if you want to change the layouts of the pages in "application/layouts".
+For a basis, take the contents of directory "application/layouts/default".
+Create a subdirectory "application/layouts/mycoolskin".
+Make their own layouts.
+
+And then include your styles, images and layouts in "application/config.ini" :
+
+  [layout]
+  path = "mycoolskin"
+

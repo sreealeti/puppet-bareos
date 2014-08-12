@@ -1,0 +1,131 @@
+<!-- job/running-dashboard.phtml -->
+
+<h1 class="dashboard">
+	<a href="<?php echo $this->baseUrl;?>/job/running" id="dashboard">
+		<?php echo $this->escape($this->titleDirRunningJobs); ?>
+	</a>
+</h1>
+
+<?php if ($this->resultDirRunningJobs): ?>
+<?php
+	if ($this->resultDirRunningJobs[0] == 'NOFOUND') {
+		echo '<font color="red"><div align="center"><p>',
+		      $this->translate->_("ERROR: Cannot execute bconsole. File not found."), '</p></div></font>';
+	}
+ 	elseif ($this->resultDirRunningJobs[0] == 'ERROR') {
+ 		echo '<font color="red"><div align="center"><p>',
+ 		     $this->translate->_("ERROR: There was a problem executing bconsole. See below."), '</p></div>';
+ 		foreach ($this->resultDirRunningJobs as $line) {
+			echo $line, '<br>';
+		}
+		echo '</font>';
+ 	} else	{
+?>
+
+<table id="box-table-dashboard">
+<thead>
+<tr>
+	 <th scope="col"> <?php print $this->translate->_("Id");   ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Level");    ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Job Name"); ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Status");   ?> </th>
+</tr>
+</thead>
+<tbody>
+<?php foreach($this->resultDirRunningJobs as $line) : ?>
+<tr>
+    <td>
+        <a href="<?php echo $this->baseUrl .'/log/view-log-id/jobid/'. $this->escape($line['id']). '/jobname/' . $this->escape($line['name']); ?>">
+            <?php echo $this->escape($line['id']);?>
+       </a>
+    </td>
+    <td><?php echo $this->escape($line['level']);?></td>
+    <td><?php echo $this->escape($line['name']);?></td>
+    <td><?php echo $this->escape($line['status']);?></td>
+</tr>
+<?php endforeach; ?>
+<tbody>
+</table>
+
+<?php
+}
+?>
+
+<?php else : ?>
+<div class="ui-widget" style="width: 80%; margin-left: 0px;">
+	<div class="ui-state-highlight ui-corner-all">
+		<p class="dashboard"><span class="ui-icon ui-icon-info" style="float: left; margin-right: 0.3em;"></span>
+		<?php print $this->translate->_("Information from Director : No Running Jobs found."); ?></p>
+	</div>
+</div>
+<?php endif; ?>
+
+
+
+
+
+
+<h1 class="dashboard" style="margin-top: 2em;">
+	<a href="<?php echo $this->baseUrl;?>/job/running" id="dashboard">
+		<?php echo $this->escape($this->titleRunningJobs); ?>
+	</a>
+</h1>
+
+<?php if ($this->resultRunningJobs): ?>
+
+<table id="box-table-dashboard">
+<thead>
+<tr>
+	 <th scope="col"> <?php print $this->translate->_("Id"); 	 ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Job Name"); ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Status"); 	 ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Level");    ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Errors"); ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Client");   ?> </th>
+     <th scope="col"> <?php print $this->translate->_("Start Time"); ?><br /> <?php print $this->translate->_("yy-mm-dd"); ?> </th>
+</tr>
+</thead>
+<tbody>
+<?php foreach($this->resultRunningJobs as $line) : ?>
+<tr>
+    <td>
+        <a href="<?php echo $this->baseUrl .'/log/view-log-id/jobid/'. $this->escape($line['jobid']). '/jobname/' . $this->escape($line['jobname']); ?>">
+            <?php echo $this->escape($line['jobid']);?>
+        </a>
+    </td>
+    <td><?php echo $this->escape($line['jobname']);?></td>
+    <?php
+        if ( $this->escape($line['joberrors']) != 0 )	{
+            echo '<td class="err" align="center"> ',
+                $this->translate->_( $this->escape($line['jobstatuslong']) ), ' </td>';
+        }
+        else
+            echo '<td align="center">',
+                $this->translate->_( $this->escape($line['jobstatuslong']) ), '</td>';
+    ?>
+
+    <td align="center"><?php echo $this->escape($line['level']);?></td>
+
+    <?php
+        if ( $this->escape($line['joberrors']) == 0 )
+            echo '<td align="center">-</td>';
+        else
+            echo '<td class="err" align="right">', $this->escape($line['joberrors']), '</td>';
+    ?>
+
+    <td ><?php echo $this->escape($line['clientname']);?></td>
+    <td><?php echo $this->escape($line['starttime']);?></td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+
+<?php else: ?>
+<div class="ui-widget" style="float: left;">
+    <div class="ui-state-highlight ui-corner-all">
+        <p class="dashboard"><span class="ui-icon ui-icon-info" style="float: left; margin-right: 0.3em;"></span>
+        <?php print $this->translate->_("Information from DB Catalog : No Running Jobs found.");?></p>
+    </div>
+</div>
+<div style="clear: both;"><!--  --></div>
+<?php endif; ?>

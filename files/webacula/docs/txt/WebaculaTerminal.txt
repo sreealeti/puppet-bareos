@@ -1,0 +1,26 @@
+
+Webacula terminal
+~~~~~~~~~~~~~~~~~
+
+Webacula provides an ajax interface to Bacula Console (bconsole) - Webacula
+terminal.
+
+Important to understand that you need to write commands to 'bconsole' in 
+the command-line-style. Webacula terminal is not fully interactive.
+
+For example, you do not have to write in terminal:
+    status
+
+correctly write so:
+    status all
+
+or:
+   status dir
+   status storage="storage.file.1"
+
+an so on.
+
+
+
+See Bacula documentation "Running the Console from a Shell Script" chapter for
+details.

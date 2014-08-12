@@ -1,0 +1,76 @@
+#!/bin/sh
+
+
+my_clean()
+{
+    rm -f *.aux *.lof *.log *.out *.html *.pdf *.txt *.toc WARNINGS *.pl *.css
+}
+
+
+
+my_pdflatex()
+{
+    rm -f $1.pdf
+    pdflatex -interaction=nonstopmode  $1.tex > /dev/null
+    # second pass for build Table Of Contents
+    pdflatex -interaction=nonstopmode  $1.tex > /dev/null
+    rc=$?
+    if [[ $rc -eq 0 ]] ; then
+        echo "pdflatex Ok"
+    else
+        echo $rc
+        echo "pdflatex ERROR"
+        exit 2
+    fi
+    mv -f $1.pdf ../pdf/
+}
+
+
+
+my_latex2html()
+{
+    latex2html -no_subdir -noinfo -no_images -white -no_navigation -split 0 $1.tex  >$1_latex2html.out 2>&1
+    rc=$?
+    if [[ $rc -eq 0 ]] ; then
+        echo "latex2html Ok"
+        cp $1.html ../html/
+        mv -f *.css   ../html/
+        mv -f *.png   ../html/
+    else
+        echo $rc
+        echo "latex2html ERROR"
+    fi
+}
+
+
+
+my_pdf2txt()
+{
+    links -dump -dump-width 80 -no-references  $1.html > $1.txt
+    rc=$?
+    if [[ $rc -eq 0 ]] ; then
+        echo "pdf2txt Ok"
+        cp $1.txt ../txt/
+    else
+        echo $rc
+        echo "pdf2txt ERROR"
+    fi
+}
+
+
+
+
+
+########################################################
+# MAIN PROGRAM
+########################################################
+
+my_clean
+
+my_pdflatex   "install"
+
+my_latex2html "install"
+my_pdf2txt    "install"
+
+my_clean
+

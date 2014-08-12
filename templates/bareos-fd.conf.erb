@@ -1,0 +1,32 @@
+#
+# Default  Bacula File Daemon Configuration file
+######################################################################################################
+############################# Directories permission #################################################
+# List Directors who are permitted to contact this File daemon
+
+Director {
+  Name = <%= scope.lookupvar('bareos::client::bareos_dir_name') %>
+  Password = "<%= scope.lookupvar('bareos::client::bareos_fd_pass') %>"
+}
+
+# Restricted Director, used by tray-monitor to get the status of the file daemon
+Director {
+  Name = <%= scope.lookupvar('bareos::client::bareos_mon_name') %>
+  Password = "<%= scope.lookupvar('bareos::client::bareos_mon_pass') %>"
+  Monitor = yes
+}
+
+####################################################################################################
+############################# File daemon Config ###################################################
+
+FileDaemon {                          # this is me
+  Name = <%= scope.lookupvar('bareos::client::bareos_fd_name') %>
+  FDport = <%= scope.lookupvar('bareos::client::bareos_fd_port') %>                  # where we listen for the director
+  Maximum Concurrent Jobs = <%= scope.lookupvar('bareos::client::max_concurrent_jobs') %>
+}
+
+# Send all messages except skipped files back to Director
+Messages {
+  Name = Standard
+  director = <%= scope.lookupvar('bareos::client::bareos_dir_name') %> = all, !skipped, !restored
+}

@@ -1,0 +1,49 @@
+# Default Bareos Storage Daemon Configuration file
+############################################################################################################
+######################################### Define Storage server ############################################
+
+Storage {                             # definition of myself
+  Name = <%= scope.lookupvar('bareos::params::bareos_sd_name') %>-sd
+  SDPort = <%= scope.lookupvar('bareos::params::bareos_sd_port') %>                  # Director's port      
+  Maximum Concurrent Jobs = <%= scope.lookupvar('bareos::params::max_concurrent_jobs') %>
+  # remove comment in next line to load plugins from specified directory
+  # Plugin Directory = /usr/lib64/bareos/plugins
+}
+
+#############################################################################################################
+#################################  Access to Storage Server #################################################
+# List Directors who are permitted to contact Storage daemon
+
+Director {
+  Name = <%= scope.lookupvar('bareos::params::bareos_dir_name') %>
+  Password = "<%= scope.lookupvar('bareos::params::default_pass') %>"
+}
+
+# Restricted Director, used by tray-monitor to get the status of the storage daemon
+Director {
+  Name = <%= scope.lookupvar('bareos::params::bareos_mon_name') %>
+  Password = "<%= scope.lookupvar('bareos::params::default_pass') %>"
+  Monitor = yes
+}
+
+############################################################################################################
+####################################### Storage Device Type ################################################
+
+Device {
+  Name = FileStorage
+  Media Type = File
+  Archive Device = /var/lib/bareos/storage
+  LabelMedia = yes;                   # lets Bareos label unlabeled media
+  Random Access = Yes;
+  AutomaticMount = yes;               # when device opened, read it
+  RemovableMedia = no;
+  AlwaysOpen = no;
+}
+
+###########################################################################################################
+####################################### Messages ##########################################################
+
+Messages {
+  Name = Standard
+  director = <%= scope.lookupvar('bareos::params::bareos_dir_name') %> = all
+}

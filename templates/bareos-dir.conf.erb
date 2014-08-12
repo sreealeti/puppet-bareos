@@ -1,0 +1,239 @@
+#This File is maintained by Puppet.
+# Default Bareos Director Configuration file
+##################################################################################################################################
+############################################ Director and JobDefs details ########################################################
+
+Director {                            # define myself
+  Name = <%= scope.lookupvar('bareos::server::bareos_dir_name') %>
+  DIRport = <%= scope.lookupvar('bareos::server::bareos_dir_port') %>                # where we listen for UA connections
+  QueryFile = "/usr/lib/bareos/scripts/query.sql"
+  WorkingDirectory = "/var/lib/bareos"
+  Maximum Concurrent Jobs = <%= scope.lookupvar('bareos::server::max_concurrent_jobs') %>
+  Password = "<%= scope.lookupvar('bareos::server::bareos_dir_pass') %>"         # Console password
+  Messages = Daemon
+}
+
+JobDefs {
+  Name = "DefaultJob"
+  Type = Backup
+  Level = Incremental
+  Client = <%= scope.lookupvar('bareos::params::bareos_fd_name') %>
+  FileSet = "Full Set"
+  Schedule = "WeeklyCycle"
+  Storage = File
+  Messages = Standard
+  Pool = File
+  Priority = 10
+  Write Bootstrap = "/var/lib/bareos/%c.bsr"
+}
+
+################################################################################################################################
+##################################### Catalog and Restore Jobs #################################################################
+
+# Backup the catalog database (after the nightly save)
+Job {
+  Name = "BackupCatalog"
+  JobDefs = "DefaultJob"
+  Level = Full
+  FileSet="Catalog"
+  Schedule = "WeeklyCycleAfterBackup"
+  RunBeforeJob = "/usr/lib/bareos/scripts/make_catalog_backup.pl MyCatalog"
+  RunAfterJob  = "/usr/lib/bareos/scripts/delete_catalog_backup"
+  Write Bootstrap = "|/usr/sbin/bsmtp -h localhost -f \"\(Bareos\) \" -s \"Bootstrap for Job %j\" root@localhost"
+  Priority = 11                   # run after main backup
+}
+
+# Standard Restore template, to be changed by Console program Only one such job is needed for all Jobs/Clients/Storage ...
+Job {
+  Name = "RestoreFiles"
+  Type = Restore
+  Client= <%= scope.lookupvar('bareos::params::bareos_fd_name') %>
+  FileSet="Full Set"
+  Storage = File
+  Pool = Default
+  Messages = Standard
+  Where = /tmp/bareos-restores
+  Maximum Concurrent Jobs = <%= scope.lookupvar('bareos::server::max_concurrent_jobs') %>
+}
+
+################################################################################################################################
+######################################### FileSet and Schedules ################################################################
+
+# List of files to be backed up
+FileSet {
+  Name = "Full Set"
+  Include {
+    Options {
+      signature = MD5
+      compression = GZIP9
+    }
+    File = /
+  }
+  Exclude {
+    File = /var/lib/bareos
+    File = /var/lib/bareos/storage
+    File = /proc
+    File = /dev
+    File = /home
+    File = /boot
+    File = /dev
+    File = /tmp
+    File = /.journal
+    File = /.fsck
+  }
+}
+
+FileSet {
+  Name = "Windows All Drives"
+  Enable VSS = yes
+  Include {
+    Options {
+      Signature = MD5
+      Drive Type = fixed
+      IgnoreCase = yes
+      WildFile = "[A-Z]:/pagefile.sys"
+      WildDir = "[A-Z]:/RECYCLER"
+      WildDir = "[A-Z]:/$RECYCLE.BIN"
+      WildDir = "[A-Z]:/System Volume Information"
+      Exclude = yes
+    }
+    File = /
+  }
+}
+
+# When to do the backups, full backup on first sunday of the month, differential (i.e. incremental since full) every other sunday, and incremental backups other days
+Schedule {
+  Name = "WeeklyCycle"
+  Run = Full 1st sun at 23:05
+  Run = Differential 2nd-5th sun at 23:05
+  Run = Incremental mon-sat at 23:05
+}
+
+# This schedule does the catalog. It starts after the WeeklyCycle
+Schedule {
+  Name = "WeeklyCycleAfterBackup"
+  Run = Full sun-sat at 23:10
+}
+
+# This is the backup of the catalog
+FileSet {
+  Name = "Catalog"
+  Include {
+    Options {
+      signature = MD5
+    }
+    File = "/var/lib/bareos/bareos.sql"
+    File = "/etc/bareos"
+  }
+}
+
+####################################################################################################################################
+################################################# Clients and Jobs #################################################################
+
+# Client (File Services) to backup
+<% scope.lookupvar('bareos::server::clients').sort.each do |@client_name,@client_data| -%>
+Client {
+  Name = <%= @client_name %>
+  Address = <% if @client_data['address'] %><%= @client_data['address'] %><% else %><%= @client_name %><% end %>
+  FDPort = <% if @client_data['port'] %><%= @client_data['port'] %><% else %>9102<% end %>
+  Catalog = MyCatalog
+  Password = "<% if @client_data['password'] %><%= @client_data['password'] %><% else %><%= scope.lookupvar('bareos::params::default_pass') %><% end %>"         # password for FileDaemon
+  File Retention = <% if @client_data['file_retention'] %><%= @client_data['file_retention'] %><% else %>30 days<% end %>
+  Job Retention = <% if @client_data['job_retention'] %><%= @client_data['job_retention'] %><% else %>6 months<% end %>
+  AutoPrune = no                     # Prune expired Jobs/Files
+  Maximum Concurrent Jobs = <%= scope.lookupvar('bareos::server::max_concurrent_jobs') %>
+}
+Job {
+  Name    = "<%= @client_name %>"
+  Client  = <%= @client_name %>
+  JobDefs = "DefaultJob"
+}
+
+
+<% end -%>
+
+#####################################################################################################################################
+#################################################### Storage names ##################################################################
+
+# Definition of the storage devices
+Storage {
+  Name = File
+  Address = <%= scope.lookupvar('bareos::server::bareos_sd_name') %>
+  SDPort = 9103
+  Password = "<%= scope.lookupvar('bareos::server::bareos_sd_pass') %>"
+  Device = FileStorage
+  Media Type = File
+  Maximum Concurrent Jobs = <%= scope.lookupvar('bareos::server::max_concurrent_jobs') %>
+}
+
+######################################################################################################################################
+################################################## Default MyCatalog #################################################################
+
+# Generic catalog service
+Catalog {
+	Name 		= MyCatalog
+	dbdriver 	= "<%= scope.lookupvar('bareos::server::bareos_db_backend') %>"
+	dbaddress 	= <%= scope.lookupvar('bareos::server::bareos_db_host') %>
+	dbname 		= "<%= scope.lookupvar('bareos::server::bareos_db_name') %>"
+	dbuser 		= "<%= scope.lookupvar('bareos::server::bareos_db_user') %>"
+	dbpassword 	= "<%= scope.lookupvar('bareos::server::bareos_db_pass') %>"
+}
+
+#########################################################################################################################################
+#################################################### Standard Messages Logs #############################################################
+
+Messages {
+  Name = Standard
+  mailcommand = "/usr/sbin/bsmtp -h localhost -f \"<%= scope.lookupvar('bareos::server::mail_from') %>\" -s \"Bareos: %t %e of %c %l\" %r"
+  operatorcommand = "/usr/sbin/bsmtp -h localhost -f \"<%= scope.lookupvar('bareos::server::mail_from') %>\" -s \"Bareos: Intervention needed for %j\" %r"
+  mail = <%= scope.lookupvar('bareos::server::mail_to') %> = all, !skipped            
+  operator = <%= scope.lookupvar('bareos::server::mail_to') %> = mount
+  console = all, !skipped, !saved
+  append = "/var/log/bareos/bareos.log" = all, !skipped
+  catalog = all
+}
+
+# Message delivery for daemon messages (no job).
+Messages {
+  Name = Daemon
+  mailcommand = "/usr/sbin/bsmtp -h localhost -f \"<%= scope.lookupvar('bareos::server::mail_from') %>\" -s \"Bareos daemon message\" %r"
+  mail = <%= scope.lookupvar('bareos::server::mail_to') %> = all, !skipped            
+  console = all, !skipped, !saved
+  append = "/var/log/bareos/bareos.log" = all, !skipped
+}
+
+##########################################################################################################################################
+###################################################### Define Pools ######################################################################
+
+Pool {
+  Name = Default
+  Pool Type = Backup
+  Recycle = yes                       # Bacula can automatically recycle Volumes
+  AutoPrune = yes                     # Prune expired volumes
+  Volume Retention = 365 days
+}
+# File Pool definition
+ Pool {
+  Name = File
+  Pool Type = Backup
+  Recycle = yes                       # Bareos can automatically recycle Volumes
+  AutoPrune = yes                     # Prune expired volumes
+  Volume Retention = 730 days         # one year
+  Maximum Volume Bytes = 50G          # Limit Volume size to something reasonable
+  Maximum Volumes = 100               # Limit number of Volumes in Pool
+}
+#               # Scratch pool definition
+ Pool {
+  Name = Scratch
+  Pool Type = Backup
+}
+                   
+##########################################################################################################################################
+####################################################### Console monitor ##################################################################
+
+# Restricted console used by tray-monitor to get the status of the director
+Console {
+  Name = <%= scope.lookupvar('bareos::server::bareos_mon_name') %>
+  Password = "<%= scope.lookupvar('bareos::server::bareos_mon_pass') %>"
+  CommandACL = status, .status
+}

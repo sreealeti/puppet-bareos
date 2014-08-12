@@ -1,0 +1,93 @@
+<!-- job/next.phtml -->
+
+<?php if ($this->result): ?>
+<?php
+	if ($this->result[0] == 'NOFOUND') {
+		echo '<font color="red"><p>',
+		      $this->translate->_("ERROR: Cannot execute bconsole. File not found."), '</p></font>';
+	}
+ 	elseif ($this->result[0] == 'ERROR') {
+ 		echo '<font color="red"><p>',
+ 		     $this->translate->_("ERROR: There was a problem executing bconsole. See below."), '</p>';
+ 		foreach ($this->result as $line) {
+			echo $line, '<br>';
+		}
+		echo '</font>';
+ 	} else	{
+?>
+
+<table id="box-table">
+<caption><?php echo $this->escape($this->title); ?></caption>
+<thead>
+<tr>
+    <th scope="col"> <?php print $this->translate->_("Level"); ?> </th>
+    <th scope="col"> <?php print $this->translate->_("Type"); ?> </th>
+    <th scope="col"> <?php print $this->translate->_("Priority"); ?> </th>
+    <th scope="col"> <?php print $this->translate->_("Scheduled"); ?> </th>
+    <th scope="col"> <?php print $this->translate->_("Job Name"); ?> </th>
+    <th scope="col"> <?php print $this->translate->_("Volume"); ?> </th>
+    <th scope="col"> <?php print $this->translate->_("% Free space<br /> on Volume"); ?> </th>
+</tr>
+</thead>
+<tbody>
+<?php foreach($this->result as $line) : ?>
+<tr>
+    <td><?php echo $this->escape($line['level']);?></td>
+    <td><?php echo $this->escape($line['type']);?></td>
+    <td align="center"><?php echo $this->escape($line['pri']);?></td>
+    <td><?php echo $this->escape($line['date']);?></td>
+	
+    <td><?php echo $this->escape($line['name']);?></td>
+    <td>
+        <?php if ($this->escape($line['vol']) === '*unknown*') : ?>
+            <?php echo $this->escape($line['vol']); ?>
+        <?php else : ?>
+            <a href="<?php echo $this->baseUrl, "/volume/find-name/volname/",
+			$this->escape($line['vol']);?>"  title="<?php print $this->translate->_("Detail Volume");?>">
+                <?php echo $this->escape($line['vol']);?></a>
+        <?php endif; ?>
+    </td>
+
+    <?php
+	$class = '';
+	switch ($line['volfree'])  {
+	case $this->unknown_volume_capacity:
+            $line['volfree'] = $this->translate->_('Unknown');
+	    break;
+	case $this->err_volume:
+            $class = 'class="err"';
+            $line['volfree'] = $this->translate->_('Volume with Errors');
+	    break;
+	case $this->new_volume:
+            $line['volfree'] = $this->translate->_('New Volume');
+            break;
+    	default:
+            if ( $line['volfree'] < 3 )
+                $class = 'class="warn"';
+            elseif ( $line['volfree'] < 7 )
+                $class = 'class="warn"';
+	    else
+                $class = '';
+            break;
+	}
+	echo '<td ',$class,' align="right">',$line['volfree'] ,'</td>';
+    ?>
+
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+
+<?php
+}
+?>
+
+<?php else : ?>
+<div class="ui-widget" style="float: left;">
+	<div class="ui-state-highlight ui-corner-all" style="padding: 0pt 0.7em; margin-top: 20px;">
+		<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: 0.3em;"></span>
+		<strong><?php print $this->translate->_("No Scheduled Jobs found."); ?></strong></p>
+	</div>
+</div>
+<div style="clear: both;"><!--  --></div>
+<?php endif; ?>

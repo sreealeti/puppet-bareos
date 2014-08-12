@@ -1,0 +1,73 @@
+s:2355:"<!-- main-menu.phtml cached by Zend_Cache : Thu, 17 Jul 2014 15:45:41 -0600 -->
+
+<ul id="main-menu" class="sf-menu">
+        <li><a href="/webacula/admin/role-index">Administrator</a>
+        <ul>
+            <li><a href="/webacula/admin/role-index">Roles</a></li>
+            <li><a href="/webacula/admin/user-index">Users</a></li>
+        </ul>
+    </li>
+       	<li><a href="/webacula/">Desktop</a>
+       	<ul>
+           	<li><a href="/webacula/director/listjobtotals">Job Totals</a></li>
+           	<li><a href="/webacula/bconsole/wterminal">
+                Bacula Console            </a></li>
+		</ul>
+	</li>
+
+        <li><a href="/webacula/director/statusdir">Director</a></li>
+    
+        <li class="current"><a href="/webacula/job/terminated">Job</a>
+		<ul>
+        	<li><a href="/webacula/job/terminated">Terminated</a></li>
+            <li><a href="/webacula/job/running">Running</a></li>
+            <li><a href="/webacula/job/next">Next</a></li>
+            <li><a href="/webacula/job/problem">Problem</a></li>
+            <li><a href="/webacula/job/run-job">Run</a></li>
+            <li><a href="/webacula/job/timeline">Timeline</a></li>
+		</ul>
+	</li>
+    <li><a href="/webacula/job/find-form">Search</a></li>
+    
+        <li><a href="/webacula/restorejob/main-form">Restore</a></li>
+    
+        <li><a href="/webacula/pool/all">Pool/Volume</a>
+    	<ul>
+        	<li><a href="/webacula/pool/all">Overview</a></li>
+            <li><a href="/webacula/volume/problem">Problem</a></li>
+		</ul>
+	</li>
+    
+        <li><a href="/webacula/client/all">Client</a>
+    </li>
+    
+        <li><a href="/webacula/storage/storage">Storage</a>
+    </li>
+    
+        <li><a href="/webacula/wblogbook/index">Logbook</a>
+        <ul>
+            <li><a href="/webacula/wblogbook/add">Add New Record</a></li>
+            <li><a href="/webacula/wbjobdesc/index">Job Descriptions</a></li>
+            <li><a href="/webacula/feed/feed">RSS</a></li>
+        </ul>
+    </li>
+    
+        <li><a href="/webacula/help/">Help</a>
+    </li>
+    
+    <li><a href="/webacula/auth/logout">
+        Logout</a>
+    </li>
+</ul>
+
+<div style="clear: both;"><!--  --></div>
+
+
+<script type="text/javascript">
+</script>
+<noscript>
+<div style="font-weight: bold; padding: 5px; background-color: red; color: white;">
+    Enable JavaScript please...</div>
+</noscript>
+
+    ";

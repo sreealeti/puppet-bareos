@@ -1,0 +1,10 @@
+#
+# Bareos User Agent (or Console) Configuration File
+#
+
+Director {
+  Name = <%= scope.lookupvar('bareos::server::bareos_dir_name') %>
+  DIRport = <%= scope.lookupvar('bareos::server::bareos_dir_port') %>
+  address = <%= scope.lookupvar('bareos::server::bareos_dir_address') %>
+  Password = "<%= scope.lookupvar('bareos::server::bareos_dir_pass') %>"
+}
