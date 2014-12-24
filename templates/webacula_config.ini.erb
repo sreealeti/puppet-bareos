@@ -60,8 +60,8 @@ fontsize   = 10
 
 
 [webacula]
-email.to_admin = <%= scope.lookupvar('bareos::web::mail_to') %>
-email.from = <%= scope.lookupvar('bareos::web::mail_to') %>
+email.to_admin = <%= scope.lookupvar('bareos::server::mail_to') %>
+email.from = webacula@localhost
 
 
 

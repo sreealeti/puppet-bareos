@@ -26,11 +26,9 @@ class bareos::params {
       $bareos_sd_path     = '/etc/bareos/bareos-sd.conf'
       $bareos_fd_path     = '/etc/bareos/bareos-fd.conf'
       $bareos_fd_tmpl     = 'bareos/bareos-fd.conf.erb'
-      $webareos_conf      = '/etc/httpd/conf.d/webareos.conf'
-      $webareos_dir       = '/usr/share/webareos/html'
-      $webareos_user_auth = "/etc/httpd/conf/webareos.users"
-      $webareos_index     = "/usr/share/webareos/html/index.php"
-      $webareos_pkgs      = ['webareos', 'php-ZendFramework-Db-Adapter-Pdo-Mysql']
+      $webacula_conf      = '/var/www/webacula/application/config.ini'
+      $webacula_db_inst   = '/var/www/webacula/install/db.conf'
+      $webacula_pkgs      = ['webacula', 'php-ZendFramework-Db-Adapter-Pdo-Mysql']
       $bareos_client_pkgs = ['bareos-client']
       $bareos_server_pkgs = ['bareos', 'bareos-database-mysql']
       $bareos_client_service = 'bareos-fd'
