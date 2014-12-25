@@ -1,8 +1,8 @@
 class bareos::web (
   $db_pass,
-  $db_user = 'bareos',
-  $db_name = 'bareos',
-  $db_host = 'localhost',
+  $db_user = $bareos::params::bareos_db_user,
+  $db_name = $bareos::params::bareos_db_name,
+  $db_host = $bareos::params::bareos_db_host,
   $webacula_config_temp = "bareos/webacula_config.ini.erb",
   $webacula_db_inst_temp = "bareos/webacula_db.conf.erb",
   $webacula_timezone ='America/Denver',
