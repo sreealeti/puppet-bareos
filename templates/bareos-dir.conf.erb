@@ -22,7 +22,10 @@ JobDefs {
   Schedule = "WeeklyCycle"
   Storage = File
   Messages = Standard
-  Pool = File
+  Pool = Inc-Pool 
+  Full Backup Pool = Full-Pool 
+  Incremental Backup Pool = Inc-Pool 
+  Differential Backup Pool = Diff-Pool
   Priority = 10
   Write Bootstrap = "/var/lib/bareos/%c.bsr"
 }
@@ -104,15 +107,15 @@ FileSet {
 # When to do the backups, full backup on first sunday of the month, differential (i.e. incremental since full) every other sunday, and incremental backups other days
 Schedule {
   Name = "WeeklyCycle"
-  Run = Full 1st sun at 23:05
-  Run = Differential 2nd-5th sun at 23:05
-  Run = Incremental mon-sat at 23:05
+  Run = Full 1st sun at 21:05
+  Run = Differential 2nd-5th sun at 21:05
+  Run = Incremental mon-sat at 21:05
 }
 
 # This schedule does the catalog. It starts after the WeeklyCycle
 Schedule {
   Name = "WeeklyCycleAfterBackup"
-  Run = Full sun-sat at 23:10
+  Run = Full sun-sat at 21:10
 }
 
 # This is the backup of the catalog
@@ -138,9 +141,9 @@ Client {
   FDPort = <% if @client_data['port'] %><%= @client_data['port'] %><% else %>9102<% end %>
   Catalog = MyCatalog
   Password = "<% if @client_data['password'] %><%= @client_data['password'] %><% else %><%= scope.lookupvar('bareos::params::default_pass') %><% end %>"         # password for FileDaemon
-  File Retention = <% if @client_data['file_retention'] %><%= @client_data['file_retention'] %><% else %>30 days<% end %>
+  File Retention = <% if @client_data['file_retention'] %><%= @client_data['file_retention'] %><% else %>60 days<% end %>
   Job Retention = <% if @client_data['job_retention'] %><%= @client_data['job_retention'] %><% else %>6 months<% end %>
-  AutoPrune = no                     # Prune expired Jobs/Files
+  AutoPrune = yes                     # Prune expired Jobs/Files
   Maximum Concurrent Jobs = <%= scope.lookupvar('bareos::server::max_concurrent_jobs') %>
 }
 Job {
@@ -212,16 +215,40 @@ Pool {
   AutoPrune = yes                     # Prune expired volumes
   Volume Retention = 365 days
 }
-# File Pool definition
+# Full Backups Pool definition
  Pool {
-  Name = File
+  Name = Full-Pool
   Pool Type = Backup
   Recycle = yes                       # Bareos can automatically recycle Volumes
   AutoPrune = yes                     # Prune expired volumes
-  Volume Retention = 730 days         # one year
-  Maximum Volume Bytes = 50G          # Limit Volume size to something reasonable
-  Maximum Volumes = 100               # Limit number of Volumes in Pool
+  Volume Retention = 180 days         # one year
+  Label Format = Full-Vol             # Auto Labeling
+  Maximum Volume Bytes = 20G          # Limit Volume size to something reasonable
+  Maximum Volumes = 15               # Limit number of Volumes in Pool
 }
+# Inc Backups Pool definition
+ Pool {
+  Name = Inc-Pool
+  Pool Type = Backup
+  Recycle = yes                       # Bareos can automatically recycle Volumes
+  AutoPrune = yes                     # Prune expired volumes
+  Volume Retention = 20 days         # one year
+  Label Format = Inc-Vol             # Auto Labeling
+  Maximum Volume Bytes = 10G          # Limit Volume size to something reasonable
+  Maximum Volumes = 10               # Limit number of Volumes in Pool
+}
+# Diff Backups Pool definition
+ Pool {
+  Name = Diff-Pool
+  Pool Type = Backup
+  Recycle = yes                       # Bareos can automatically recycle Volumes
+  AutoPrune = yes                     # Prune expired volumes
+  Volume Retention = 40 days         # one year
+  Label Format = Diff-Vol             # Auto Labeling
+  Maximum Volume Bytes = 15G          # Limit Volume size to something reasonable
+  Maximum Volumes = 10               # Limit number of Volumes in Pool
+}
+
 #               # Scratch pool definition
  Pool {
   Name = Scratch
