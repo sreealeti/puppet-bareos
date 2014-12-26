@@ -28,7 +28,7 @@ class bareos::server (
 #install repository with bareos packages
 	require bareos::repository
 #install server packages
-   	package { $bareos::params::bareos_server_pkgs: ensure => latest }
+   	package { $bareos::params::bareos_server_pkgs: ensure => installed }
 
 #install mysql database and populate tables
 	if $bareos_manage_db == 'true' {

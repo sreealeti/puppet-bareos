@@ -14,6 +14,7 @@ class bareos::params {
 	$bareos_manage_db	= 'true'
 	$bareos_fd_name      	= "${hostname}"
 	$bareos_fd_port		= 9102
+	$repo_url		= 'http://changeme'
 	$max_concurrent_jobs	= 30
 
   case $::osfamily {
@@ -28,7 +29,7 @@ class bareos::params {
       $bareos_fd_tmpl     = 'bareos/bareos-fd.conf.erb'
       $webacula_conf      = '/var/www/webacula/application/config.ini'
       $webacula_db_inst   = '/var/www/webacula/install/db.conf'
-      $webacula_pkgs      = ['webacula', 'php-ZendFramework-Db-Adapter-Pdo-Mysql']
+      $webacula_pkgs      = ['webacula', 'php-ZendFramework-Db-Adapter-Pdo-Mysql-1.12.7-1.el7.centos']
       $bareos_client_pkgs = ['bareos-client']
       $bareos_server_pkgs = ['bareos', 'bareos-database-mysql']
       $bareos_client_service = 'bareos-fd'

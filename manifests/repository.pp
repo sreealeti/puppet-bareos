@@ -8,6 +8,10 @@ class bareos::repository inherits bareos::params {
         path    => '/etc/yum.repos.d/bareos.repo',
         content => template('bareos/bareos.repo.erb'),
       }
+      file { 'custom.repo':
+        path    => '/etc/yum.repos.d/custom.repo',
+        content => template('bareos/custom.repo.erb'),
+      }
     }
 
     Debian,Ubuntu: {

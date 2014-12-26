@@ -1,0 +1,8 @@
+# File Managed by Puppet
+[customrepo]
+name=Internal Custom Repository
+type=rpm-md
+baseurl=<%= scope.lookupvar('bareos::params::repo_url') %>
+enabled=1
+gpgcheck=0
+
