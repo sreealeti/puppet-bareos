@@ -14,21 +14,6 @@ class bareos::web (
     package { $bareos::params::webacula_pkgs: ensure => installed }
     #package { $apache::params::mod_packages['ssl']: ensure => latest, notify => Class['apache::service'] }
 
-    exec { 'fix webacula index.php':
-        command => "sed -i 's/\(^define(.BACULA_VERSION., *\)\([0-9]*\)/\114/' $bareos::params::webacula_index",
-        path    => [ "/bin", "/usr/bin" ],
-        unless  => "grep -q '^define(.BACULA_VERSION., *14' $bareos::params::webacula_index",
-        require => Package[$bareos::params::webacula_pkgs]
-    }
-
-    file { $bareos::params::webacula_user_auth:
-        owner   => root,
-        group   => root,
-        mode    => 644,
-        source  => $auth_user_file,
-        require => Package[$bareos::params::webacula_pkgs],
-    }
-
     file { "/var/www/webacula/application/config.ini":
         owner   => root,
         group   => root,
@@ -36,5 +21,20 @@ class bareos::web (
         content => template($webacula_config_temp),
         require => Package[$bareos::params::webacula_pkgs],
     }
+    
+    file { "/var/www/webacula/install/db.conf":
+        owner   => root,
+        group   => root,
+        mode    => 644,
+        content => template($webacula_db_inst_temp),
+        require => Package[$bareos::params::webacula_pkgs],
+	notify   => Exec["make_webacula_tables"]
+    }
+    
+    exec { 'make_webacula_tables':
+                                        command     => "/var/www/webacula/install/MySql/10_make_tables.sh && /var/www/webacula/install/MySql/20_acl_make_tables.sh",
+                                        refreshonly => true,
+                                        require => Package[$bareos::params::webacula_pkgs],
+                                        }
 }
 
