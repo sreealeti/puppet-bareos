@@ -14,7 +14,7 @@ db.config.dbname = <%= scope.lookupvar('bareos::web::db_name') %>
 
 ;; see http://www.php.net/timezones
 ; def.timezone = "UTC"
-def.timezone = "<%= scope.lookupvar('bareos::web::timezone') %>"
+def.timezone = "<%= @timezone %>"
 
 ;; if locale undefined, webacula use autodetect
 ;; avaliable locales : en, de, fr, pt_BR, ru, it, es
